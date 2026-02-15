@@ -1,68 +1,63 @@
-# 📱 A&I : Android and iOS Development
+# A&I Report Server (초기 버전)
+> **한 줄 소개**: 동아리 과제 운영을 위한 리액티브 기반 리포트/회원 관리 백엔드
 
-<img src="https://github.com/user-attachments/assets/b98d32a0-7f19-4112-89d7-81cb4c9ec86a" width="300"/>
+## 1. 프로젝트 개요 (Overview)
+- **개발 기간**: 2025.03 ~ 진행 중
+- **개발 인원**: 백엔드 1명
+- **프로젝트 목적**: 리포트 공개/조회/관리 기능과 기본 인증 체계를 구축
+- **Repository**: /Users/dh/Desktop/Code/A&I/aandi_post_web_server
 
+## 2. 사용 기술 및 선정 이유 (Tech Stack & Decision)
 
-**인덕대학교 모바일 앱 개발 동아리 A&I에 오신 것을 환영합니다!** 😊  
-저희는 모두가 즐겁고 Lean한 분위기에서 **더 나은 방향을 함께 연구하는 동아리**입니다. 🔥
+| Category | Tech Stack | Version | Decision Reason (Why?) |
+| --- | --- | --- | --- |
+| **Language** | Kotlin | 1.9.25 | DTO/도메인 모델을 명확하게 표현하고 유지보수성을 높이기 위함 |
+| **Framework** | Spring Boot WebFlux | 3.4.3 | 비동기 API 처리 기반으로 리포트 서비스 확장 여지 확보 |
+| **Database** | MongoDB Reactive | - | 과제 문서 구조를 유연하게 저장하기 위함 |
+| **Security** | Spring Security + JWT | jjwt 0.12.5 | 관리자/일반 사용자 접근 권한을 분리하기 위함 |
+| **Docs** | SpringDoc OpenAPI | 2.3.0 | 협업 시 API 계약을 명세로 관리하기 위함 |
 
-## 👨‍🏫 프로젝트 소개
+## 3. 시스템 아키텍처 (System Architecture)
+```mermaid
+graph TD
+  Client --> API[WebFlux API]
+  API --> Security[JWT Security]
+  API --> Mongo[(MongoDB)]
+```
 
-본 프로젝트는 A&I 3기 동아리원을 대상으로 한  
-**레포트 공유 및 제출 웹 서비스**입니다.
+- **설계 특징**:
+- `member`, `report`, `common` 패키지 분리
+- 리포트 도메인(`Report`, `ReportType`, `Level`)과 DTO 변환 레이어 분리
+- Swagger 기반 API 문서 제공
 
-- 과제를 자동 공개하고,
-- 과제 제출 시스템을 제공하며,
-- 로그인을 기반으로 한 심화 기능을 제공합니다.
+## 4. 핵심 기능 (Key Features)
+- **리포트 관리 API**: 생성/조회/수정/삭제
+- **진행 중 리포트 조회**: 기간 기준 필터링된 요약 조회
+- **회원 인증**: 로그인 및 JWT 발급
+- **권한 기반 접근**: 관리자 기능과 일반 조회 기능 분리
 
-## ⏰ 개발 기간
+## 5. 트러블 슈팅 및 성능 개선 (Troubleshooting & Refactoring)
+### 5-1. API 계약 안정성 확보
+- **문제(Problem)**: enum/시간 포맷이 일관되지 않으면 프론트 연동 오류 발생 가능
+- **원인(Cause)**: 요청 DTO마다 파싱 규칙이 다르면 `reportType`, `level`, 시간대 해석이 불일치
+- **해결(Solution)**:
+  1. DTO 계층에서 enum과 UTC 시간 변환 규칙 명시
+  2. 상세/요약 응답 DTO를 분리해 계약을 고정
+- **검증(Verification)**: 잘못된 enum/시간 포맷 요청에 대한 예외 응답 패턴 확인
+- **결과(Result)**: 클라이언트 연동 시 파싱 오류 감소, 계약 변경 영향 범위 축소
 
-- **2025년 03월 07일 ~ 진행 중**
-- 이 저장소는 **Back-End Repository**입니다.
+### 5-2. 권한 정책 명확화
+- **문제(Problem)**: 리포트 관리 API에 권한 경계가 약하면 운영 데이터 변경 리스크 증가
+- **원인(Cause)**: 쓰기 API와 조회 API가 동일 권한으로 열려 있으면 오용 가능성 증가
+- **해결(Solution)**:
+  1. Security 설정으로 관리자 전용 경로를 명시
+  2. 인증 필터 적용 경로를 분리해 정책 가독성 확보
+- **검증(Verification)**: 일반 사용자 토큰으로 쓰기 API 호출 시 차단되는지 확인
+- **결과(Result)**: 쓰기 권한 오남용 가능성 감소
 
+## 6. 프로젝트 회고 (Retrospective)
+- **배운 점**: 기능 구현과 함께 DTO 계약, 권한 정책을 동시에 설계해야 협업 비용이 줄어듦
+- **아쉬운 점 & 향후 계획**: 모니터링/성능 측정 지표를 추가해 운영 안정성을 강화할 계획
 
-## 👥 프로젝트 팀원
-
-| Front-End | Back-End |
-|:--:|:--:|
-| <img src="https://github.com/user-attachments/assets/3e22107e-3e30-44d5-8d4a-61cfbab8eac2" width="100"/> | <img src="https://github.com/user-attachments/assets/a51e908a-f9ca-4819-a36a-5f26da14a3aa" width="100"/> |
-| [Han Sang Wook](https://github.com/SangWook16074) | [Hood](https://github.com/stdiodh) |
-
-
-## ⚙️ 기술 스택
-
-### 🛠 Back-End
-
-| Kotlin | Spring Boot | MongoDB | AWS EC2 | Docker | GitHub Actions | Nignx |
-|:--:|:--:|:--:|:--:|:--:|:--:|:---:|
-| <img src="https://github.com/user-attachments/assets/80ae7152-6b52-477e-bee7-504e46119af2" width="50"/> | <img src="https://github.com/user-attachments/assets/f0a5c7a5-1ea5-486f-884e-f404e227f9d4" width="50"/> | <img src="https://github.com/user-attachments/assets/b1e27d13-222d-47f0-b25a-98d975283be3" width="50"/> | <img src="https://github.com/user-attachments/assets/1e5aaa79-0a47-4e20-9023-6ebd930d1716" width="50"/> | <img src="https://github.com/user-attachments/assets/8531285b-ac7a-43c5-a856-7dd15bbf1ed5" width="50"/> | <img src="https://simpleicons.org/icons/githubactions.svg" width="50"/> | <img src="https://github.com/user-attachments/assets/b09662b0-c4ed-4400-ab03-26e3a4515c12" width="50"/> |
-
-## 📌 주요 기능
-
-### ✅ A&I 레포트 공개
-- 매주 **월요일 오전 9시**, 새로운 과제가 자동 공개됩니다.  
-<img src="https://github.com/user-attachments/assets/df2c1775-4304-4e62-a109-3cf1e638d72c" width="600"/>
-
-### 🔐 로그인 기반 심화 기능
-- 로그인한 사용자만 접근 가능한 프로그래밍 학습 콘텐츠를 제공할 예정입니다.
-<img src="https://github.com/user-attachments/assets/17a957a3-0d77-444c-b43c-8368b58b0db1" width="600"/>
-
-### 📝 A&I 레포트 제출 (예정)
-- 동아리원이 자신의 과제를 제출할 수 있는 기능입니다.
-
-## 🗂️ ERD
-
-<img src="https://github.com/user-attachments/assets/0ac35082-bce5-4b96-8915-35d0312b71d6" width="800"/>
-
-
-## 📢 기여 방법 (Contribution Guide)
-
-1. 이 저장소를 **Fork** 합니다.
-2. 새로운 기능을 위한 **브랜치를 생성**합니다.
-3. 코드를 추가 또는 수정합니다.
-4. 완료되면 **Pull Request**를 보내 팀원과 리뷰 및 병합합니다.
-
-
-## 📬 문의
-
-- 프로젝트 관련 문의는 팀원에게 직접 연락 부탁드립니다.
+## 7. API 명세
+- API 요약 문서: `/Users/dh/Desktop/Code/A&I/aandi_post_web_server/docs/API_SPEC.md`
